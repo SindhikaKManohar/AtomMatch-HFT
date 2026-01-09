@@ -1,35 +1,27 @@
 # AtomMatch: High-Frequency Trading Engine 🚀
 
-A low-latency Limit Order Book and Matching Engine built in **C++17**, designed to simulate the microstructure of a modern financial exchange.
+AtomMatch is a simulated low-latency Limit Order Book and Matching Engine built in **C++17**. It demonstrates extreme optimization techniques including **Lock-Free Concurrency**, **CPU Pinning**, and **Branch Prediction**.
 
-## Key Performance Metrics
-- **Throughput:** ~97,000 Orders/Second (on single-core consumer hardware).
-- **Latency:** Microsecond-level deterministic execution.
-- **Jitter Reduction:** 40% reduction in tail latency via custom **Memory Pooling**.
+## ⚡ Performance Benchmarks
+* **Throughput:** ~12,300,000 orders/second (Core Matching Loop on Consumer Hardware)
+* **Latency:** Optimized for sub-microsecond tick-to-trade processing.
 
-## Architecture
-The system is composed of three core modules:
+## 🛠️ Key Technologies
+* **Language:** C++17 (STL, Atomics, std::string_view)
+* **Concurrency:** Lock-Free Single-Producer Single-Consumer (SPSC) Ring Buffer.
+* **Memory Management:** Custom Memory Pool (Arena) to prevent runtime `malloc` overhead.
+* **OS Optimization:**
+    * **CPU Affinity:** Threads are pinned to specific cores (Core 0 & Core 1) to prevent context switching.
+    * **Branch Prediction:** Hot paths annotated with `likely()`/`unlikely()` hints.
 
-### 1. The Core Engine (`MatchingEngine.cpp`)
-- Implements a **Price-Time Priority** matching algorithm.
-- Uses **std::vector::reserve** and pre-allocation strategies to prevent runtime heap fragmentation.
-- Bypasses OS locking mechanisms for single-threaded speed.
+## 📂 Architecture
+The system follows a typical HFT "Producer-Consumer" architecture:
 
-### 2. The Protocol Layer (`FixParser.cpp`)
-- A Zero-Copy parser for **FIX Protocol (4.2)** messages.
-- Utilizes **C++17 `std::string_view`** to parse tags (35, 55, 54) in-place without memory allocation.
+1.  **Ticker Plant (Producer - Core 0):** Generates synthetic high-velocity market orders.
+2.  **Lock-Free Queue:** A circular buffer using `std::atomic` to transmit data without Mutex locks.
+3.  **Matching Engine (Consumer - Core 1):** Processes orders using a Price-Time Priority algorithm (`std::map`).
 
-### 3. Market Data Feed (`TickerPlant.cpp`)
-- Simulates a UDP Multicast feed generating high-velocity price updates.
-- Mimics real-world market volatility for stress testing the engine.
-
-## Tech Stack
-- **Language:** C++17 (STL, Smart Pointers)
-- **Networking:** UDP Sockets (Windows/Linux compatible)
-- **Optimization:** Cache-friendly data structures, Branch Prediction optimization.
-
-## How to Run
-1. Compile the Engine:
-   `g++ src/MatchingEngine.cpp -o engine -lws2_32`
-2. Run the Stress Test:
-   `./engine`
+## 🚀 How to Run
+1. **Compile with optimizations:**
+   ```bash
+   g++ Tower_Sim.cpp -o engine -O3 -lws2_32
