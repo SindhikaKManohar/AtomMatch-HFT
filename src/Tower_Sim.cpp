@@ -6,8 +6,8 @@
 #include <map>
 #include <windows.h> 
 
-#define likely(x)      __builtin_expect(!!(x), 1)
-#define unlikely(x)    __builtin_expect(!!(x), 0)
+#define likely(x)       __builtin_expect(!!(x), 1)
+#define unlikely(x)     __builtin_expect(!!(x), 0)
 
 enum Side { BUY, SELL };
 
@@ -17,7 +17,6 @@ struct Order {
     int quantity;
     Side side;
 };
-
 
 template<typename T>
 class LockFreeQueue {
@@ -50,7 +49,6 @@ public:
     }
 };
 
-
 class MatchingEngine {
 private:
     std::map<double, int, std::greater<double>> bids;
@@ -82,7 +80,6 @@ void pinThread(int core_id) {
     SetThreadAffinityMask(GetCurrentThread(), mask);
 }
 
-
 void tickerPlant(LockFreeQueue<Order>& queue, std::atomic<bool>& running) {
     pinThread(0); 
     int orderID = 0;
@@ -96,8 +93,8 @@ void tickerPlant(LockFreeQueue<Order>& queue, std::atomic<bool>& running) {
 
         while (!queue.push(ord) && running) {
         }
-    
-        std::this_thread::sleep_for(std::chrono::microseconds(1)); 
+        
+        // Removed sleep for maximum stress test speed
     }
 }
 
